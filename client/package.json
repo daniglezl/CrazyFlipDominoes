@@ -1,0 +1,17 @@
+{
+  "name": "crazy_flip_dominoes",
+  "version": "1.0.0",
+  "description": "A dominoes game using electron and nodejs sockets",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron src/main.js"
+  },
+  "author": "Daniel Gonzalez",
+  "license": "ISC",
+  "devDependencies": {
+    "electron-prebuilt-compile": "^1.6.2"
+  },
+  "dependencies": {
+    "jQuery": "^1.7.4"
+  }
+}
