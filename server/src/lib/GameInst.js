@@ -41,7 +41,32 @@ class GameInst {
   }
 
   dealCards() {
-    console.log("dealing cards")
+    let cards = []
+    for(let i = 0; i < 10; i++) {
+      for(let j = i; j < 10; j++) {
+        cards.push(`c${ i }-${ j }`)
+      }
+    }
+    cards.forEach((c) => {
+      let index1 = cards.indexOf(c)
+      let index2 = this.getRandom(0, cards.length - 1)
+      let temp = cards[index1]
+      cards[index1] = cards[index2]
+      cards[index2] = temp
+    })
+    let count = 0
+    let playerCards = ""
+    this.players.forEach((p) => {
+      playerCards = cards.slice(count, count + 10).join(",")
+      p.write(playerCards)
+      count += 10
+    })
+  }
+
+  getRandom(min, max) {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min + 1)) + min
   }
 }
 

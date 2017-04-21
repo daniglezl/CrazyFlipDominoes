@@ -1,7 +1,3 @@
-// const { app, BrowserWindow } = require('electron')
-// const path = require('path')
-// const url = require('url')
-// const net = require('net')
 import { app, BrowserWindow } from 'electron'
 import {enableLiveReload} from 'electron-compile'
 import path from 'path'
@@ -30,8 +26,6 @@ function createWindow() {
   win.on("closed", () => {
     win = null
   })
-
-  // let clientSocket = new ClientSocket('127.0.0.1', '6900')
 }
 
 app.on("ready", createWindow)

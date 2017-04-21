@@ -5,13 +5,16 @@ const PORT = '6900'
 let socket = null
 
 $(document).ready(() => {
+  // $(".game-screen").hide()
+  $(".main-content").hide()
+
   $("#play-1v1").on("click", () => {
-    socket = new ClientSocket(HOST, PORT)
+    socket = new ClientSocket(HOST, PORT, $)
     socket.send("1v1")
   })
 
   $("#play-2v2").on("click", () => {
-    socket = new ClientSocket(HOST, PORT)
+    socket = new ClientSocket(HOST, PORT, $)
     socket.send("2v2")
   })
 })
