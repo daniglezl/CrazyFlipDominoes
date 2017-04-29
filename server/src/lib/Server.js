@@ -9,18 +9,10 @@ class Server {
     this.chatPortMin = chatPort[0]
     this.chatPortMax = chatPort[1]
     this.currentGamePort = this.gamePortMin
-    let { gameSocket, chatSocket } = this.createSockets()
-    this.gameSocket = gameSocket
-    this.chatSocket = chatSocket
+    this.currentChatPort = this.chatPortMin
+    this.gameSocket = this.createGameSocket()
     this.gameInstances = []
     this.clients = []
-  }
-
-  createSockets() {
-    return {
-      gameSocket: this.createGameSocket(),
-      chatSocket: this.createChatSocket()
-    }
   }
 
   createGameSocket() {
@@ -37,10 +29,6 @@ class Server {
     })
 
     return gameSocket
-  }
-
-  createChatSocket() {
-    return null
   }
 
   onData(sock, data) {
@@ -60,12 +48,16 @@ class Server {
     if (inst) {
       if (inst.isFull()) {
         this.gameInstances = this.gameInstances.filter((e) => e.gameType !== gameType)
-        this.gameInstances.push(new GameInst(sock, gameType, this.host, this.getInstPort()))
+        this.gameInstances.push(
+          new GameInst(sock, gameType, this.host, this.getInstPort(), this.getChatPort())
+        )
       } else {
         inst.addPlayer(sock)
       }
     } else {
-      this.gameInstances.push(new GameInst(sock, gameType, this.host, this.getInstPort()))
+      this.gameInstances.push(
+        new GameInst(sock, gameType, this.host, this.getInstPort(), this.getChatPort())
+      )
     }
   }
 
@@ -74,6 +66,13 @@ class Server {
     if (this.currentGamePort == this.gamePortMax + 1)
       this.currentGamePort = this.gamePortMin + 1
     return this.currentGamePort
+  }
+
+  getChatPort() {
+    this.currentChatPort += 1
+    if (this.currentChatPort == this.chatPortMax + 1)
+      this.currentChatPort = this.chatPortMin
+    return this.currentChatPort
   }
 
   onClose(sock) {

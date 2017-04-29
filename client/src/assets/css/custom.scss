@@ -26,6 +26,7 @@
 .game-screen {
   .chat-window {
     max-width: 200px;
+    position: relative;
     .chat-header {
       background-color: #262A37;
       display: block;
@@ -35,6 +36,32 @@
       font-size: 20px;
       line-height: 50px;
       text-align: center;
+    }
+    #chat-messages {
+      width: 100%;
+      position: absolute;
+      top: 50px;
+      bottom: 50px;
+      overflow-y: scroll;
+      .message {
+        display: block;
+        b {
+          text-decoration: underline;
+        }
+      }
+    }
+    .chat-box {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 0;
+      textarea {
+        width: 100%;
+        max-width: 100%;
+        height: 50px;
+        max-height: 50px;
+      }
     }
   }
 }

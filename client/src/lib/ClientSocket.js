@@ -1,12 +1,19 @@
 import net from 'net'
+import dgram from 'dgram'
+import EventEmitter from 'events'
 
-class ClientSocket {
-  constructor(host, port, $) {
+class ClientSocket extends EventEmitter {
+  constructor(host, port) {
+    super()
     this.host = host
     this.port = port
     this.socket = this.createSocket()
+    this.chatSocket = null
     this.hand = []
-    this.$ = $
+    this.me = null
+    this.myTurn = false
+    this.remaining = null
+    this.chatPort = null
     this.connect()
   }
 
@@ -29,38 +36,52 @@ class ClientSocket {
     return socket
   }
 
-  onData(sock, data) {
-    console.log(`[DATA]: ${ data }`)
-    if (data.toString().indexOf("gi") == 0) {
-      const port = data.toString().substring(2)
-      let host = sock.remoteAddress
-      sock.destroy()
-      sock = this.createSocket()
-      sock.connect(port, host, () => {
-        console.log(`[CONNECTED GAME]: Connected to game on ${ host }:${ port }`)
-      })
-    } else if (data.toString().indexOf("c") == 0) {
-      this.hand = data.toString().split(",")
-        .map((e) => e.substring(1).split("-"))
-        .map((e) => {
-          return {
-            top: parseInt(e[0]),
-            bottom: parseInt(e[1])
-          }
-        })
+  createChatSocket(port) {
+    this.chatPort = port
+    this.chatSocket = dgram.createSocket('udp4')
+    this.chatSocket.send("a", this.chatPort, this.host)
+    this.chatSocket.on("message", (msg) => this.emit("message-received", msg))
+  }
 
-      let main = this.$("#hand-container")
-      this.hand.forEach((c) => {
-        main.append(`
-          <div class="card" data-top=${ c.top } data-bottom=${ c.bottom }>
-            <div class="top face-${c.top}"></div>
-            <div class="bottom face-${c.bottom}"></div>
-          </div>
-        `)
-      })
-      this.$(".main-content").hide()
-      this.$(".game-screen").show()
-    }
+  sendMessage(msg) {
+    this.chatSocket.send(`p${ this.me }m${ msg }`, this.chatPort, this.host)
+  }
+
+  onData(sock, data) {
+    data.toString().split("*").forEach((command) => {
+      console.log(`[DATA]: ${ command }`)
+      if (command.indexOf("cp") == 0) {
+        this.createChatSocket(command.substring(2))
+      } else if (command.indexOf("gi") == 0) {
+        const port = command.substring(2)
+        let host = sock.remoteAddress
+        sock.destroy()
+        sock = this.createSocket()
+        sock.connect(port, host, () => {
+          console.log(`[CONNECTED GAME]: Connected to game on ${ host }:${ port }`)
+        })
+      } else if (command.indexOf("c") == 0) {
+        this.hand = command.split(",")
+          .map((e) => e.substring(1).split("-"))
+          .map((e) => {
+            return {
+              top: parseInt(e[0]),
+              bottom: parseInt(e[1])
+            }
+          })
+        this.emit("render-cards")
+      } else if (command.indexOf("y") == 0) {
+        this.me = parseInt(command.substring(1))
+      } else if (command.indexOf("r") == 0) {
+        this.remaining = command.substring(1).split(",")
+          .map((e) => e.split("-"))
+          .map((e) => [parseInt(e[0]), parseInt(e[1])])
+        this.emit("show-remaining")
+      } else if (command.indexOf("t") == 0) {
+        this.myTurn = true;
+        this.emit("my-turn")
+      }
+    })
   }
 
   send(msg) {
